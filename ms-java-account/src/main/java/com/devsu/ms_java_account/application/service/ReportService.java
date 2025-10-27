@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.devsu.ms_java_account.application.dto.AccountReportDTO;
-import com.devsu.ms_java_account.domain.Account;
 import com.devsu.ms_java_account.domain.Transaction;
 import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
 

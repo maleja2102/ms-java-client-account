@@ -1,12 +1,14 @@
 package domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="clients")
 public class Client extends Person{
 
@@ -18,6 +20,6 @@ public class Client extends Person{
     private String password;
 
     @Column(nullable = false)
-    private Boolean active;
+    private Boolean status;
 }
 

@@ -30,7 +30,12 @@ public class ReportController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate starDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        return ResponseEntity.ok(service.generateReport(clientId, starDate, endDate));
+        if(starDate.isAfter(endDate)){
+            return ResponseEntity.badRequest().build();
+        }
+        List<AccountReportDTO> report = service.generateReport(clientId, starDate, endDate);
+        if (report.isEmpty()) return ResponseEntity.noContent().build();
+        else return ResponseEntity.ok(report);
     }
     
 }
