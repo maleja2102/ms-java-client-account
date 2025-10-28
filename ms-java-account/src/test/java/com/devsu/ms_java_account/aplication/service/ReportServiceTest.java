@@ -16,11 +16,11 @@ import static org.mockito.Mockito.when;
 
 import com.devsu.ms_java_account.application.dto.AccountReportDTO;
 import com.devsu.ms_java_account.application.service.ReportService;
-import com.devsu.ms_java_account.domain.Account;
-import com.devsu.ms_java_account.domain.Transaction;
 import com.devsu.ms_java_account.domain.enums.AccountType;
 import com.devsu.ms_java_account.domain.enums.TransactionType;
 import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
 
 class ReportServiceTest {
 
@@ -30,13 +30,13 @@ class ReportServiceTest {
     @InjectMocks
     private ReportService reportService;
 
-    private Transaction transaction;
+    private TransactionEntity transaction;
 
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
 
-        Account account = new Account();
+        AccountEntity account = new AccountEntity();
         account.setAccountId(1L);
         account.setClientId(1L);
         account.setAccountNumber(123456L);
@@ -45,7 +45,7 @@ class ReportServiceTest {
         account.setCurrentBalance(BigDecimal.valueOf(800));
         account.setActive(true);
 
-        transaction = new Transaction();
+        transaction = new TransactionEntity();
         transaction.setTransactionId(1L);
         transaction.setAccount(account);
         transaction.setTransactionType(TransactionType.DEPOSIT);

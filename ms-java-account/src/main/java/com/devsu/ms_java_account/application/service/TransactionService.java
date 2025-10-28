@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.devsu.ms_java_account.domain.Account;
-import com.devsu.ms_java_account.domain.Transaction;
 import com.devsu.ms_java_account.domain.enums.TransactionType;
 import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
 import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
 
 import jakarta.transaction.Transactional;
 
@@ -26,8 +26,8 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction registerTransaction(Long accountId, Transaction transaction){
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found"));
+    public TransactionEntity registerTransaction(Long accountId, TransactionEntity transaction){
+        AccountEntity account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found"));
 
         BigDecimal newBalance = calculateNewBalance(account, transaction);
 
@@ -45,7 +45,7 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    private BigDecimal calculateNewBalance(Account account, Transaction transaction){
+    private BigDecimal calculateNewBalance(AccountEntity account, TransactionEntity transaction){
         BigDecimal current = account.getCurrentBalance();
         BigDecimal amount = transaction.getAmount();
 
@@ -54,11 +54,11 @@ public class TransactionService {
         : current.subtract(amount);
     }
 
-    public List<Transaction> getAllTransactions(){
+    public List<TransactionEntity> getAllTransactions(){
         return transactionRepository.findAll();
     }
 
-    public List<Transaction> getTransactionsByAccount(Long accountId){
+    public List<TransactionEntity> getTransactionsByAccount(Long accountId){
         return transactionRepository.findByAccount_AccountId(accountId);
     }
 

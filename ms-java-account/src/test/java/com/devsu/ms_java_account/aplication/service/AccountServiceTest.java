@@ -16,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mock;
 
-import com.devsu.ms_java_account.application.service.AccountService;
-import com.devsu.ms_java_account.domain.Account;
+import com.devsu.ms_java_account.domain.AccountUseCase;
 import com.devsu.ms_java_account.domain.enums.AccountType;
 import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
 
 
 
@@ -29,14 +29,14 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @InjectMocks
-    private AccountService accountService;
+    private AccountUseCase accountService;
 
-    private Account account;
+    private AccountEntity account;
 
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
-        account = new Account();
+        account = new AccountEntity();
         account.setAccountId(1L);
         account.setAccountNumber(987654L);
         account.setAccountType(AccountType.SAVINGS);
@@ -48,19 +48,19 @@ class AccountServiceTest {
 
     @Test
     void createAccountWithActiveStatusAndInitialBalance(){
-        when(accountRepository.save(any(Account.class))).thenReturn(account);
+        when(accountRepository.save(any(AccountEntity.class))).thenReturn(account);
 
-        Account saved = accountService.createAccount(account);
+        AccountEntity saved = accountService.createAccount(account);
         assertThat(saved.getCurrentBalance().equals(BigDecimal.valueOf(1000)));
         assertThat(saved.getActive()).isTrue();
-        verify(accountRepository, times(1)).save(any(Account.class));
+        verify(accountRepository, times(1)).save(any(AccountEntity.class));
     }
 
     @Test
     void retrieveAccountById(){
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
-        Account result = accountService.getAccountById(1L);
+        AccountEntity result = accountService.getAccountById(1L);
 
         assertThat(result).isNotNull();
         assertThat(result.getAccountNumber().equals(987654L));

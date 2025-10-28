@@ -18,12 +18,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.devsu.ms_java_account.application.service.TransactionService;
-import com.devsu.ms_java_account.domain.Account;
-import com.devsu.ms_java_account.domain.Transaction;
 import com.devsu.ms_java_account.domain.enums.AccountType;
 import com.devsu.ms_java_account.domain.enums.TransactionType;
 import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
 import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
 
 class TransactionServiceTest {
 
@@ -36,12 +36,12 @@ class TransactionServiceTest {
     @InjectMocks
     private TransactionService  transactionService;
 
-    private Account account;
+    private AccountEntity account;
 
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
-        account = new Account();
+        account = new AccountEntity();
         account.setAccountId(1L);
         account.setClientId(1L);
         account.setAccountNumber(123456L);
@@ -54,26 +54,26 @@ class TransactionServiceTest {
     @Test
     void registerDepositTransactionSuccessfully()
     {
-        Transaction tx = new Transaction();
+        TransactionEntity tx = new TransactionEntity();
         tx.setTransactionType(TransactionType.DEPOSIT);
         tx.setAmount(BigDecimal.valueOf(200));
 
         when(accountRepository.findById(1L)).thenReturn(java.util.Optional.of(account));
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArguments()[0]);
-        when(accountRepository.save(any(Account.class))).thenReturn(account);
+        when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(accountRepository.save(any(AccountEntity.class))).thenReturn(account);
 
-        Transaction saved = transactionService.registerTransaction(1L, tx);
+        TransactionEntity saved = transactionService.registerTransaction(1L, tx);
 
         assertThat(saved.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
         assertThat(saved.getBalanceAfterTransaction().equals(BigDecimal.valueOf(1200)));
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verify(accountRepository, times(1)).save(any(Account.class));
+        verify(transactionRepository, times(1)).save(any(TransactionEntity.class));
+        verify(accountRepository, times(1)).save(any(AccountEntity.class));
 
     }
 
     @Test
     void exceptionWhenInsufficientFunds(){
-        Transaction tx = new Transaction();
+        TransactionEntity tx = new TransactionEntity();
         tx.setTransactionType(TransactionType.WITHDRAWAL);
         tx.setAmount(BigDecimal.valueOf(1500));
 
@@ -82,6 +82,6 @@ class TransactionServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, ()-> transactionService.registerTransaction(1L, tx));
 
         assertThat(exception.getMessage().contains("Insufficient balance"));
-        verify(transactionRepository, never()).save(any(Transaction.class));
+        verify(transactionRepository, never()).save(any(TransactionEntity.class));
     }
 }

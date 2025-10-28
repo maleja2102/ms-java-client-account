@@ -5,39 +5,54 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
+import com.devsu.ms_java_account.application.dto.AccountRequest;
+import com.devsu.ms_java_account.application.dto.AccountResponse;
+import com.devsu.ms_java_account.application.service.port.AccountServicePort;
 import com.devsu.ms_java_account.domain.Account;
+import com.devsu.ms_java_account.domain.port.out.AccountPort;
+import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
 
 @Service
-public class AccountService {
-    private final AccountRepository repository;
+public class AccountService implements AccountServicePort{
 
-    public AccountService(AccountRepository repository){
-        this.repository = repository;
+    private final AccountPort accountUseCase;
+   
+    public AccountService(AccountPort accountUseCase){
+        this.accountUseCase = accountUseCase;
     }
 
-    public List<Account> getAllAccounts(){
-        return repository.findAll();
+    @Override
+    public List<AccountResponse> getAllAccounts() {
+        List<Account> accounts = accountUseCase.getAllAccounts();
+        return accounts.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public Account getAccountById(Long id){
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
+    @Override
+    public AccountResponse getAccountById(Long id) {
+        Account account = accountUseCase.getAccountById(id);
+        return mapToResponse(account);
     }
 
-    public Account createAccount(Account account){
-        account.setCurrentBalance(account.getInitialBalance() != null ? account.getInitialBalance() : BigDecimal.ZERO);
-        account.setActive(true);
-        return repository.save(account);
+    @Override
+    public AccountResponse createAccount(AccountRequest account) {
+        AccountEntity accountEntity = mapToEntity(account);
+        Account createdAccount = accountUseCase.createAccount(accountEntity);
+        return mapToResponse(createdAccount);
     }
 
-    public Account updateAccount(Long id, Account updated){
-        Account existing = getAccountById(id);
-        existing.setAccountType(updated.getAccountType());
-        existing.setActive(updated.getActive());
-        return repository.save(existing);
+    @Override
+    public AccountResponse updateAccount(Long id, AccountRequest account) {
+        AccountEntity accountEntity = mapToEntity(account);
+        Account updatedAccount = accountUseCase.updateAccount(id, accountEntity);
+        return mapToResponse(updatedAccount);
     }
 
-    public void deleteAccount(Long id){
-        repository.deleteById(id);
+    @Override
+    public void deleteAccount(Long id) {
+        accountUseCase.deleteAccount(id);
     }
+
 }

@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.devsu.ms_java_account.application.service.TransactionService;
-import com.devsu.ms_java_account.domain.Transaction;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -25,17 +26,17 @@ public class TransactionController {
     }
 
     @PostMapping("/{accountId}")
-    public ResponseEntity<Transaction> createTransaction(@PathVariable Long accountId, @RequestBody Transaction transaction){
+    public ResponseEntity<TransactionEntity> createTransaction(@PathVariable Long accountId, @RequestBody TransactionEntity transaction){
         return ResponseEntity.ok(service.registerTransaction(accountId, transaction));
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
+    public ResponseEntity<List<TransactionEntity>> getAllTransactions() {
         return ResponseEntity.ok(service.getAllTransactions());
     }
     
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<Transaction>> getByAccount(@PathVariable Long accountId){
+    public ResponseEntity<List<TransactionEntity>> getByAccount(@PathVariable Long accountId){
         return ResponseEntity.ok(service.getTransactionsByAccount(accountId));
     }
 

@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.devsu.ms_java_account.domain.Transaction;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
     
-    List<Transaction> findByAccount_AccountId(Long accountId);
-    List<Transaction> findByAccount_ClienteIdAndDateBetween(Long clientId, LocalDateTime start, LocalDateTime end);
+    List<TransactionEntity> findByAccount_AccountId(Long accountId);
+    List<TransactionEntity> findByAccount_ClienteIdAndDateBetween(Long clientId, LocalDateTime start, LocalDateTime end);
 }

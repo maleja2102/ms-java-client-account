@@ -1,17 +1,11 @@
-package com.devsu.ms_java_account.domain;
+package com.devsu.ms_java_account.application.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import com.devsu.ms_java_account.domain.enums.AccountType;
 
-import lombok.Getter;
-import lombok.Setter;
-
-
-@Getter
-@Setter
-public class Account {
+public class AccountResponse {
     private Long accountId;
     private Long accountNumber;
     private AccountType accountType;
@@ -19,5 +13,5 @@ public class Account {
     private BigDecimal currentBalance;
     private Boolean active;
     private Long clientId;
-    private List<Transaction> transactions;
+    private List<TransactionResponse> transactions;
 }

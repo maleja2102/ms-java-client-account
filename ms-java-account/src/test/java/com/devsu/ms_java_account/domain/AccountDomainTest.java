@@ -7,12 +7,13 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 import com.devsu.ms_java_account.domain.enums.AccountType;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
 
 class AccountDomainTest {
 
     @Test
     void createAccountWithDefaultValues(){
-        Account account = new Account();
+        AccountEntity account = new AccountEntity();
         account.setAccountId(1L);
         account.setAccountNumber(987654L);
         account.setAccountType(AccountType.SAVINGS);
@@ -29,7 +30,7 @@ class AccountDomainTest {
     
     @Test
     void allowBalanceUpdates(){
-        Account account = new Account();
+        AccountEntity account = new AccountEntity();
         account.setCurrentBalance(BigDecimal.valueOf(1000));
         account.setCurrentBalance(account.getCurrentBalance().add(BigDecimal.valueOf(500)));
         

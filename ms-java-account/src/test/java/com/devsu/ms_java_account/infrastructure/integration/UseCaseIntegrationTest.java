@@ -13,10 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.devsu.ms_java_account.domain.Account;
-import com.devsu.ms_java_account.domain.Transaction;
 import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
 import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
+import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,7 +32,7 @@ class UseCaseIntegrationTest {
     @Test
     @Order(1)
     void connectToMySQLAndFindPreloadedAccounts() {
-        List<Account> accounts = accountRepository.findAll();
+        List<AccountEntity> accounts = accountRepository.findAll();
         assertThat(accounts).isNotEmpty();
         assertThat(accounts).hasSizeGreaterThanOrEqualTo(4);
         System.out.println("Connected to MySQl, found" + accounts.size() + "accounts.");
@@ -41,11 +41,11 @@ class UseCaseIntegrationTest {
     @Test
     @Order(2)
     void findTransactionsForMarianela() {
-        List<Transaction> marianelaTxs = transactionRepository.findByAccount_ClienteIdAndDateBetween(2L,
+        List<TransactionEntity> marianelaTxs = transactionRepository.findByAccount_ClienteIdAndDateBetween(2L,
                 LocalDateTime.parse("2022-02-07T00:00:00"), LocalDateTime.parse("2022-02-11T00:00:00"));
 
         assertThat(marianelaTxs).isNotEmpty();
-        assertThat(marianelaTxs).extracting(Transaction::getAmount).contains(BigDecimal.valueOf(600),
+        assertThat(marianelaTxs).extracting(TransactionEntity::getAmount).contains(BigDecimal.valueOf(600),
                 BigDecimal.valueOf(-540));
 
         System.out.println("Found Marianela's transactions: " + marianelaTxs.size());
@@ -61,15 +61,15 @@ class UseCaseIntegrationTest {
     @Test
     @Order(3)
     void validateJoseWithdrawal(){
-        Account joseAccount = accountRepository.findAll().stream()
+        AccountEntity joseAccount = accountRepository.findAll().stream()
         .filter(a -> a.getAccountNumber() == 478758L)
         .findFirst()
         .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        List<Transaction> joseTxs = transactionRepository.findByAccount_AccountId(joseAccount.getAccountId());
+        List<TransactionEntity> joseTxs = transactionRepository.findByAccount_AccountId(joseAccount.getAccountId());
         assertThat(joseTxs).isNotEmpty();
 
-        Transaction lastTx = joseTxs.get(0);
+        TransactionEntity lastTx = joseTxs.get(0);
         assertThat(lastTx.getBalanceAfterTransaction()).isEqualTo(BigDecimal.valueOf(1425));
 
         System.out.println("💰 Jose Lema withdrawal verified. Balance after transaction: " + lastTx.getBalanceAfterTransaction());
@@ -78,7 +78,7 @@ class UseCaseIntegrationTest {
     @Test
     @Order(4)
     void verifyTransactionIntegrityAndForeignKeys(){
-        List<Transaction> allTxs = transactionRepository.findAll();
+        List<TransactionEntity> allTxs = transactionRepository.findAll();
         assertThat(allTxs).hasSizeGreaterThanOrEqualTo(4);
         allTxs.forEach(tx->{
             assertThat(tx.getAccount()).isNotNull();
