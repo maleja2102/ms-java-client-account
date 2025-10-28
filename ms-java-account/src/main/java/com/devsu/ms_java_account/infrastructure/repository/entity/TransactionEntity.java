@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="transactions")
+@Table(name="transaction")
 public class TransactionEntity {
 
     @Id

@@ -9,5 +9,4 @@ public class MsJavaAccountApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MsJavaAccountApplication.class, args);
 	}
-
 }
