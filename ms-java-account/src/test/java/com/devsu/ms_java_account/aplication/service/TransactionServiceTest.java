@@ -9,39 +9,39 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.devsu.ms_java_account.application.service.TransactionService;
+import com.devsu.ms_java_account.domain.Account;
+import com.devsu.ms_java_account.domain.Transaction;
+import com.devsu.ms_java_account.domain.TransactionUseCase;
 import com.devsu.ms_java_account.domain.enums.AccountType;
 import com.devsu.ms_java_account.domain.enums.TransactionType;
-import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
-import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
-import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
-import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
+import com.devsu.ms_java_account.domain.exception.BusinessException;
+import com.devsu.ms_java_account.domain.port.out.AccountRepositoryPort;
+import com.devsu.ms_java_account.domain.port.out.TransactionRepositoryPort;
 
+@ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private TransactionRepositoryPort transactionRepositoryPort;
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountRepositoryPort accountRepositoryPort;
 
-    @InjectMocks
-    private TransactionService  transactionService;
-
-    private AccountEntity account;
+    private TransactionUseCase transactionUseCase;
+    private Account account;
 
     @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-        account = new AccountEntity();
+    void setUp() {
+        transactionUseCase = new TransactionUseCase(transactionRepositoryPort, accountRepositoryPort);
+
+        account = new Account();
         account.setAccountId(1L);
         account.setClientId(1L);
         account.setAccountNumber(123456L);
@@ -52,36 +52,39 @@ class TransactionServiceTest {
     }
 
     @Test
-    void registerDepositTransactionSuccessfully()
-    {
-        TransactionEntity tx = new TransactionEntity();
+    void registerDepositTransactionSuccessfully() {
+        Transaction tx = new Transaction();
         tx.setTransactionType(TransactionType.DEPOSIT);
         tx.setAmount(BigDecimal.valueOf(200));
 
-        when(accountRepository.findById(1L)).thenReturn(java.util.Optional.of(account));
-        when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer(i -> i.getArguments()[0]);
-        when(accountRepository.save(any(AccountEntity.class))).thenReturn(account);
+        when(accountRepositoryPort.findById(1L)).thenReturn(account);
+        when(accountRepositoryPort.save(any(Account.class))).thenReturn(account);
+        when(transactionRepositoryPort.save(any(Transaction.class))).thenAnswer(invocation -> {
+            Transaction toSave = invocation.getArgument(0);
+            toSave.setTransactionId(10L);
+            return toSave;
+        });
 
-        TransactionEntity saved = transactionService.registerTransaction(1L, tx);
+        Transaction saved = transactionUseCase.registerTransaction(1L, tx);
 
         assertThat(saved.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
-        assertThat(saved.getBalanceAfterTransaction().equals(BigDecimal.valueOf(1200)));
-        verify(transactionRepository, times(1)).save(any(TransactionEntity.class));
-        verify(accountRepository, times(1)).save(any(AccountEntity.class));
-
+        assertThat(saved.getBalanceAfterTransaction()).isEqualByComparingTo(BigDecimal.valueOf(1200));
+        verify(transactionRepositoryPort, times(1)).save(any(Transaction.class));
+        verify(accountRepositoryPort, times(1)).save(any(Account.class));
     }
 
     @Test
-    void exceptionWhenInsufficientFunds(){
-        TransactionEntity tx = new TransactionEntity();
+    void exceptionWhenInsufficientFunds() {
+        Transaction tx = new Transaction();
         tx.setTransactionType(TransactionType.WITHDRAWAL);
         tx.setAmount(BigDecimal.valueOf(1500));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(accountRepositoryPort.findById(1L)).thenReturn(account);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, ()-> transactionService.registerTransaction(1L, tx));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> transactionUseCase.registerTransaction(1L, tx));
 
-        assertThat(exception.getMessage().contains("Insufficient balance"));
-        verify(transactionRepository, never()).save(any(TransactionEntity.class));
+        assertThat(exception.getMessage()).contains("Insufficient balance");
+        verify(transactionRepositoryPort, never()).save(any(Transaction.class));
     }
 }

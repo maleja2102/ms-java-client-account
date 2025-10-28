@@ -41,7 +41,7 @@ class UseCaseIntegrationTest {
     @Test
     @Order(2)
     void findTransactionsForMarianela() {
-        List<TransactionEntity> marianelaTxs = transactionRepository.findByAccount_ClienteIdAndDateBetween(2L,
+        List<TransactionEntity> marianelaTxs = transactionRepository.findByAccount_ClientIdAndDateBetween(2L,
                 LocalDateTime.parse("2022-02-07T00:00:00"), LocalDateTime.parse("2022-02-11T00:00:00"));
 
         assertThat(marianelaTxs).isNotEmpty();

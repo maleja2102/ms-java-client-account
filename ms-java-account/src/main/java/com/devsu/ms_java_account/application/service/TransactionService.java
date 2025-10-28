@@ -1,65 +1,45 @@
 package com.devsu.ms_java_account.application.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.devsu.ms_java_account.domain.enums.TransactionType;
-import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
-import com.devsu.ms_java_account.infrastructure.repository.TransactionRepository;
-import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
-import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEntity;
-
-import jakarta.transaction.Transactional;
+import com.devsu.ms_java_account.application.dto.TransactionRequest;
+import com.devsu.ms_java_account.application.dto.TransactionResponse;
+import com.devsu.ms_java_account.application.mapper.TransactionMapper;
+import com.devsu.ms_java_account.application.service.port.TransactionServicePort;
+import com.devsu.ms_java_account.domain.Transaction;
+import com.devsu.ms_java_account.domain.port.in.TransactionPort;
 
 @Service
-public class TransactionService {
-    
-    private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository;
+public class TransactionService implements TransactionServicePort {
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository){
-        this.transactionRepository = transactionRepository;
-        this.accountRepository = accountRepository;
+    private final TransactionPort transactionPort;
+    private final TransactionMapper transactionMapper;
+
+    public TransactionService(TransactionPort transactionPort, TransactionMapper transactionMapper) {
+        this.transactionPort = transactionPort;
+        this.transactionMapper = transactionMapper;
     }
 
-    @Transactional
-    public TransactionEntity registerTransaction(Long accountId, TransactionEntity transaction){
-        AccountEntity account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found"));
-
-        BigDecimal newBalance = calculateNewBalance(account, transaction);
-
-        if(newBalance.compareTo(BigDecimal.ZERO)< 0){
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        transaction.setDate(LocalDateTime.now());
-        transaction.setBalanceAfterTransaction(newBalance);
-        transaction.setAccount(account);
-
-        account.setCurrentBalance(newBalance);
-        accountRepository.save(account);
-
-        return transactionRepository.save(transaction);
+    @Override
+    public TransactionResponse registerTransaction(Long accountId, TransactionRequest transactionRequest) {
+        Transaction transaction = transactionMapper.toDomain(transactionRequest);
+        Transaction saved = transactionPort.registerTransaction(accountId, transaction);
+        return transactionMapper.toResponse(saved);
     }
 
-    private BigDecimal calculateNewBalance(AccountEntity account, TransactionEntity transaction){
-        BigDecimal current = account.getCurrentBalance();
-        BigDecimal amount = transaction.getAmount();
-
-        return transaction.getTransactionType() == TransactionType.DEPOSIT
-        ? current.add(amount)
-        : current.subtract(amount);
+    @Override
+    public List<TransactionResponse> getAllTransactions() {
+        return transactionPort.getAllTransactions().stream()
+                .map(transactionMapper::toResponse)
+                .toList();
     }
 
-    public List<TransactionEntity> getAllTransactions(){
-        return transactionRepository.findAll();
+    @Override
+    public List<TransactionResponse> getTransactionsByAccount(Long accountId) {
+        return transactionPort.getTransactionsByAccount(accountId).stream()
+                .map(transactionMapper::toResponse)
+                .toList();
     }
-
-    public List<TransactionEntity> getTransactionsByAccount(Long accountId){
-        return transactionRepository.findByAccount_AccountId(accountId);
-    }
-
 }

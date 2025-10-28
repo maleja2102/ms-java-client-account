@@ -10,5 +10,5 @@ import com.devsu.ms_java_account.infrastructure.repository.entity.TransactionEnt
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
     
     List<TransactionEntity> findByAccount_AccountId(Long accountId);
-    List<TransactionEntity> findByAccount_ClienteIdAndDateBetween(Long clientId, LocalDateTime start, LocalDateTime end);
+    List<TransactionEntity> findByAccount_ClientIdAndDateBetween(Long clientId, LocalDateTime start, LocalDateTime end);
 }

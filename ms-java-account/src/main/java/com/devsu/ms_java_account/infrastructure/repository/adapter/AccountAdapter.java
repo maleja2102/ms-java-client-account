@@ -2,11 +2,15 @@ package com.devsu.ms_java_account.infrastructure.repository.adapter;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.devsu.ms_java_account.domain.Account;
-import com.devsu.ms_java_account.domain.port.in.AccountRepositoryPort;
+import com.devsu.ms_java_account.domain.exception.BusinessException;
+import com.devsu.ms_java_account.domain.port.out.AccountRepositoryPort;
 import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
 import com.devsu.ms_java_account.infrastructure.repository.mapper.AccountEntityMapper;
 
+@Component
 public class AccountAdapter implements AccountRepositoryPort {
 
     private final AccountRepository accountRepository;
@@ -26,10 +30,9 @@ public class AccountAdapter implements AccountRepositoryPort {
 
     @Override
     public Account findById(Long id) {
-        return accountRepository.findById(id).stream()
+        return accountRepository.findById(id)
                 .map(accountEntityMapper::toDomain)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new BusinessException("Account not found with id: " + id));
     }
 
     @Override

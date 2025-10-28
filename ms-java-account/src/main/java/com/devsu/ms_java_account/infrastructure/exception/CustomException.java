@@ -1,6 +1,6 @@
 package com.devsu.ms_java_account.infrastructure.exception;
 
-class CustomException extends RuntimeException{
+public class CustomException extends RuntimeException{
 
     private final String errorCode;
 
