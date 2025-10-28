@@ -5,10 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.devsu.ms_java_account.domain.port.in.AccountRepositoryPort;
-import com.devsu.ms_java_account.domain.port.out.AccountPort;
-import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
-import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.domain.port.in.AccountPort;
+import com.devsu.ms_java_account.domain.port.out.AccountRepositoryPort;
 
 @Service
 public class AccountUseCase  implements AccountPort{
@@ -39,8 +37,16 @@ public class AccountUseCase  implements AccountPort{
     @Override
     public Account updateAccount(Long id, Account updated){
         Account existing = getAccountById(id);
+        existing.setAccountNumber(updated.getAccountNumber());
         existing.setAccountType(updated.getAccountType());
+        if (updated.getInitialBalance() != null) {
+            existing.setInitialBalance(updated.getInitialBalance());
+        }
+        if (updated.getCurrentBalance() != null) {
+            existing.setCurrentBalance(updated.getCurrentBalance());
+        }
         existing.setActive(updated.getActive());
+        existing.setClientId(updated.getClientId());
         return repositoryPort.save(existing);
     }
 

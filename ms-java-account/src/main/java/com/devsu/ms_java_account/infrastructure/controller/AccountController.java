@@ -1,6 +1,6 @@
 package com.devsu.ms_java_account.infrastructure.controller;
+
 import com.devsu.ms_java_account.application.service.port.AccountServicePort;
-import com.devsu.ms_java_account.domain.AccountUseCase;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

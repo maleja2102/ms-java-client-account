@@ -1,42 +1,37 @@
 package com.devsu.ms_java_account.aplication.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.devsu.ms_java_account.domain.Account;
 import com.devsu.ms_java_account.domain.AccountUseCase;
 import com.devsu.ms_java_account.domain.enums.AccountType;
-import com.devsu.ms_java_account.infrastructure.repository.AccountRepository;
-import com.devsu.ms_java_account.infrastructure.repository.entity.AccountEntity;
+import com.devsu.ms_java_account.domain.port.out.AccountRepositoryPort;
 
-
-
+@ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountRepositoryPort accountRepositoryPort;
 
-    @InjectMocks
-    private AccountUseCase accountService;
-
-    private AccountEntity account;
+    private AccountUseCase accountUseCase;
+    private Account account;
 
     @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-        account = new AccountEntity();
+    void setUp() {
+        accountUseCase = new AccountUseCase(accountRepositoryPort);
+        account = new Account();
         account.setAccountId(1L);
         account.setAccountNumber(987654L);
         account.setAccountType(AccountType.SAVINGS);
@@ -47,23 +42,28 @@ class AccountServiceTest {
     }
 
     @Test
-    void createAccountWithActiveStatusAndInitialBalance(){
-        when(accountRepository.save(any(AccountEntity.class))).thenReturn(account);
+    void createAccountWithActiveStatusAndInitialBalance() {
+        when(accountRepositoryPort.save(any(Account.class))).thenAnswer(invocation -> {
+            Account toSave = invocation.getArgument(0);
+            toSave.setAccountId(1L);
+            return toSave;
+        });
 
-        AccountEntity saved = accountService.createAccount(account);
-        assertThat(saved.getCurrentBalance().equals(BigDecimal.valueOf(1000)));
+        Account saved = accountUseCase.createAccount(account);
+
+        assertThat(saved.getCurrentBalance()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         assertThat(saved.getActive()).isTrue();
-        verify(accountRepository, times(1)).save(any(AccountEntity.class));
+        verify(accountRepositoryPort, times(1)).save(any(Account.class));
     }
 
     @Test
-    void retrieveAccountById(){
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+    void retrieveAccountById() {
+        when(accountRepositoryPort.findById(1L)).thenReturn(account);
 
-        AccountEntity result = accountService.getAccountById(1L);
+        Account result = accountUseCase.getAccountById(1L);
 
         assertThat(result).isNotNull();
-        assertThat(result.getAccountNumber().equals(987654L));
-        verify(accountRepository).findById(1L);
-    } 
+        assertThat(result.getAccountNumber()).isEqualTo(987654L);
+        verify(accountRepositoryPort).findById(1L);
+    }
 }

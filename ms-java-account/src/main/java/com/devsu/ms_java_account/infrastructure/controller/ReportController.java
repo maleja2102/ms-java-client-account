@@ -27,13 +27,13 @@ public class ReportController {
     @GetMapping
     public ResponseEntity<List<AccountReportDTO>> getReport(
         @RequestParam Long clientId,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate starDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        if(starDate.isAfter(endDate)){
+        if(startDate.isAfter(endDate)){
             return ResponseEntity.badRequest().build();
         }
-        List<AccountReportDTO> report = service.generateReport(clientId, starDate, endDate);
+        List<AccountReportDTO> report = service.generateReport(clientId, startDate, endDate);
         if (report.isEmpty()) return ResponseEntity.noContent().build();
         else return ResponseEntity.ok(report);
     }
