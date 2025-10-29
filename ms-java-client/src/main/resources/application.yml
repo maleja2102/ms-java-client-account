@@ -1,5 +1,5 @@
 server:
-    port: 8081
+  port: 8081
 
 spring:
   datasource:
@@ -14,7 +14,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        "[format_sql]": true
+        format_sql: true
 
   test:
     database:
