@@ -53,6 +53,6 @@ public class GlobalExceptionHandler {
     }
 
     private String formatFieldError(FieldError error) {
-        return String.format("%s: %s", error.getField(), error.getDefaultMessage());
+        return "%s: %s".formatted(error.getField(), error.getDefaultMessage());
     }
 }
