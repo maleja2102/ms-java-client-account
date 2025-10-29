@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    # Permite sobreescribir con SPRING_DATASOURCE_URL en contenedores. Por defecto usa 3307 en host.
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://127.0.0.1:3307/clientdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  test:
+    database:
+      replace: NONE
